@@ -11,9 +11,28 @@ from payments.utils import create_payment_gateway
 
 RETURN_PATH = "/api/method/frappe_webpay.api.webpay_return"
 
+# Credenciales públicas que Transbank publica para Webpay Plus en ambiente
+# de Integración (ver readme.md, Parte 9.1): iguales para todos los
+# comercios, no secretas, y solo sirven contra webpay3gint.transbank.cl.
+# Unica fuente de verdad: tanto el botón "Usar credenciales de prueba" como
+# `frappe_webpay.setup.configure_integration_test_mode` (bench execute)
+# llaman a set_integration_test_credentials() en vez de duplicarlas.
+INTEGRATION_COMMERCE_CODE = "597055555532"
+INTEGRATION_API_KEY = "579B532A7440BB0C9079DED94D31EA1615BACEB56610332264630D42D0A36B1C"
+
 
 class WebpaySettings(Document):
 	supported_currencies = ("CLP",)
+
+	@frappe.whitelist()
+	def set_integration_test_credentials(self):
+		"""Deja Webpay Settings listo para el ambiente de Integración sin
+		tocar código: llamado desde el botón del formulario (webpay_settings.js)
+		y desde setup.py para el bootstrap por bench execute."""
+		self.environment = "Integration"
+		self.commerce_code = INTEGRATION_COMMERCE_CODE
+		self.api_key_secret = INTEGRATION_API_KEY
+		self.save()
 
 	def on_update(self):
 		# Registra el gateway. LMS Settings.payment_gateway es un Link a

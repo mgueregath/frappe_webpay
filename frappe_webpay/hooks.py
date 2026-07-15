@@ -12,7 +12,13 @@ use_json_request_body = True
 # Apps
 # ------------------
 
-# required_apps = []
+# LMS: webpay_settings.get_payment_url() is invoked by lms.lms.payments and
+# writes conventions LMS expects (LMS Settings.payment_gateway, order_id).
+# payments: create_payment_gateway() registers "Webpay" as a Payment Gateway.
+# Neither import is optional — installing this app on a site without both
+# fails at hooks-import time with an obscure ModuleNotFoundError instead of
+# this explicit, checked-at-install-time message.
+required_apps = ["lms", "payments"]
 
 # Each item in the list will be shown as an app in the apps page
 # add_to_apps_screen = [
@@ -274,4 +280,21 @@ require_type_annotated_api_methods = True
 # ------------
 # List of apps whose translatable strings should be excluded from this app's translations.
 # ignore_translatable_strings_from = []
+
+# Custom extension points
+# ------------------------------
+#
+# webpay_result_branding: lets another installed app (typically a theme)
+# restyle /webpay-resultado without frappe_webpay depending on it. Declare a
+# dict in that app's hooks.py, e.g.:
+#
+#   webpay_result_branding = {
+#       "container": "your-css-class",
+#       "surface": "your-css-class",
+#       "cta_button": "your-css-class",
+#   }
+#
+# Any key left out keeps frappe_webpay's built-in generic style for that
+# element. See frappe_webpay/www/webpay_resultado.py:get_branding and
+# README.md for details. Reference implementation: achiduach_theme/hooks.py.
 

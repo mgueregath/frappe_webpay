@@ -5,15 +5,12 @@ vía `bench --site <site> execute frappe_webpay.setup.configure_integration_test
 Sirve tanto para el primer setup como para reaplicar despues de que el
 contenedor se recree (el sitio no persiste, solo esta app).
 
-Credenciales de integración: son las públicas que Transbank publica para
-Webpay Plus (ver readme.md, Parte 9.1) — no son secretas, apuntan a
-https://webpay3gint.transbank.cl y solo sirven en ese ambiente.
+Para configurar solo las credenciales (sin tocar CLP/LMS Settings), no hace
+falta este script: el botón "Usar credenciales públicas de prueba" en
+/app/webpay-settings hace lo mismo desde la UI, sin bench execute.
 """
 
 import frappe
-
-INTEGRATION_COMMERCE_CODE = "597055555532"
-INTEGRATION_API_KEY = "579B532A7440BB0C9079DED94D31EA1615BACEB56610332264630D42D0A36B1C"
 
 
 def configure_integration_test_mode():
@@ -41,10 +38,7 @@ def _disable_usd_equivalent():
 def _configure_webpay_settings():
 	settings = frappe.get_single("Webpay Settings")
 	settings.enabled = 1
-	settings.environment = "Integration"
-	settings.commerce_code = INTEGRATION_COMMERCE_CODE
-	settings.api_key_secret = INTEGRATION_API_KEY
-	settings.save(ignore_permissions=True)
+	settings.set_integration_test_credentials()
 
 
 def _configure_lms_payment_gateway():

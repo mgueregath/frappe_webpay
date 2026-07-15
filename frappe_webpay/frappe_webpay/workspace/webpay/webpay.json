@@ -1,0 +1,73 @@
+{
+ "app": "frappe_webpay",
+ "charts": [],
+ "content": "[{\"id\": \"wpHeader1\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Webpay</b></span>\", \"col\": 12}}, {\"id\": \"wpPara1\", \"type\": \"paragraph\", \"data\": {\"text\": \"<a href=\\\"/app/webpay-settings\\\">Webpay Settings</a>\", \"col\": 12}}, {\"id\": \"wpSpacer1\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"wpShortcut1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Solicitudes Webpay\", \"col\": 4}}, {\"id\": \"wpSpacer2\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"wpCard1\", \"type\": \"card\", \"data\": {\"card_name\": \"Webpay\", \"col\": 4}}]",
+ "creation": "2026-07-15 15:57:53.091060",
+ "custom_blocks": [],
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "hide_custom": 0,
+ "icon": "credit-card",
+ "idx": 0,
+ "indicator_color": "green",
+ "is_hidden": 0,
+ "label": "Webpay",
+ "link_type": "DocType",
+ "links": [
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Webpay",
+   "link_count": 2,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Webpay Settings",
+   "link_count": 0,
+   "link_to": "Webpay Settings",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Integration Request",
+   "link_count": 0,
+   "link_to": "Integration Request",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  }
+ ],
+ "modified": "2026-07-15 15:57:53.091060",
+ "modified_by": "Administrator",
+ "module": "Frappe Webpay",
+ "name": "Webpay",
+ "number_cards": [],
+ "owner": "Administrator",
+ "parent_page": "",
+ "public": 1,
+ "quick_lists": [],
+ "roles": [],
+ "sequence_id": 57.0,
+ "shortcuts": [
+  {
+   "color": "Green",
+   "doc_view": "List",
+   "format": "{} Solicitudes",
+   "label": "Solicitudes Webpay",
+   "link_to": "Integration Request",
+   "stats_filter": "{\"integration_request_service\": [\"=\", \"Webpay\"]}",
+   "type": "DocType"
+  }
+ ],
+ "sidebar_items": [],
+ "standard": 1,
+ "title": "Webpay",
+ "type": "Workspace"
+}

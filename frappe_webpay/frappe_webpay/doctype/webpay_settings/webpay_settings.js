@@ -3,4 +3,7 @@
 
 frappe.ui.form.on("Webpay Settings", {
 	// refresh(frm) {},
+	use_integration_test_credentials(frm) {
+		frm.call("set_integration_test_credentials").then(() => frm.reload_doc());
+	},
 });

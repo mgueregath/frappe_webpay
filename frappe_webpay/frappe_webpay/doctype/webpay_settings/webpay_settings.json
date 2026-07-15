@@ -8,7 +8,8 @@
   "enabled",
   "environment",
   "commerce_code",
-  "api_key_secret"
+  "api_key_secret",
+  "use_integration_test_credentials"
  ],
  "fields": [
   {
@@ -36,6 +37,13 @@
    "fieldtype": "Password",
    "label": "Api Key Secret",
    "reqd": 1
+  },
+  {
+   "depends_on": "eval:doc.environment==\"Integration\"",
+   "description": "Llena Commerce Code y Api Key Secret con las credenciales públicas que Transbank publica para el ambiente de Integración (no son secretas, son las mismas para todos los comercios y solo sirven contra webpay3gint.transbank.cl). No requiere editar código ni volver a desplegar.",
+   "fieldname": "use_integration_test_credentials",
+   "fieldtype": "Button",
+   "label": "Usar credenciales públicas de prueba (Integración)"
   }
  ],
  "issingle": 1,

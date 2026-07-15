@@ -1,8 +1,36 @@
 {% extends "templates/web.html" %}
 
+{% set container_class = branding.container or "webpay-container" %}
+{% set surface_class = branding.surface or "webpay-surface" %}
+{% set button_class = branding.cta_button or "webpay-cta-button" %}
+
 {% block page_content %}
-<div class="ach-container" style="padding-top:50px; max-width:560px;">
-<div class="ach-surface">
+{% if not branding.container %}
+{# No theme registered webpay_result_branding (see hooks.py): ship a
+   self-contained generic look so this page never renders unstyled. #}
+<style>
+.webpay-container { padding-top: 50px; max-width: 560px; margin: 0 auto; }
+.webpay-surface {
+    background: var(--card-bg, #fff);
+    border: 1px solid var(--border-color, #d1d8dd);
+    border-radius: 8px;
+    padding: 32px;
+}
+.webpay-surface table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+.webpay-surface table td { padding: 6px 0; border-bottom: 1px solid var(--border-color, #eee); }
+.webpay-surface table td:first-child { color: var(--text-muted, #6c7680); }
+.webpay-cta-button {
+    display: inline-block;
+    padding: 10px 20px;
+    border-radius: 6px;
+    background: var(--primary, #2490ef);
+    color: #fff;
+    text-decoration: none;
+}
+</style>
+{% endif %}
+<div class="{{ container_class }}">
+<div class="{{ surface_class }}">
 
 {% if aprobado %}
     <h2>Pago aprobado</h2>
@@ -16,7 +44,7 @@
         <tr><td>Cuotas</td><td>{{ cuotas }}</td></tr>
         <tr><td>Tarjeta</td><td>**** **** **** {{ tarjeta }}</td></tr>
     </table>
-    <p style="margin-top:24px"><a class="ach-cta-button" href="{{ continuar }}">Ir al curso</a></p>
+    <p style="margin-top:24px"><a class="{{ button_class }}" href="{{ continuar }}">Ir al curso</a></p>
 
 {% elif estado == "Cancelled" %}
     <h2>Pago no completado</h2>

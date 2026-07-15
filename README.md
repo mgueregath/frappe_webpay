@@ -1,83 +1,103 @@
 ### Frappe Webpay
 
-Integración de pago Webpay Plus (Transbank) para el LMS de la Alianza
-Chilena Contra la Depresión. Implementa exactamente la guía verificada en
-`readme.md` (raíz del repo) — ese documento explica el *por qué* de cada
-decisión de diseño; este README cubre solo cómo está instalado y qué falta
-para probarlo de punta a punta.
+Integración de pago **Webpay Plus** (Transbank) para **Frappe LMS**. Se
+instala como una app más de Frappe: agrega "Webpay" como Payment Gateway
+para que LMS lo ofrezca en el checkout de cursos pagados.
 
-### Por qué vive en `/workspace` (igual que `achiduach_theme`)
+Para el detalle de diseño y el paso a paso de cómo se construyó esta app
+desde cero, ver `readme.md` en la raíz del repo. Este documento cubre solo
+cómo instalarla y configurarla en tu propia instancia.
 
-Este proyecto corre `apps/lms` dentro de un contenedor cuyo `frappe-bench`
-**no está en un volumen** — se pierde si el contenedor se recrea. Por eso
-esta app está en `/workspace/frappe_webpay` (montado al host vía
-`docker-compose.yml`), instalada con
-`bench get-app --soft-link /workspace/frappe_webpay` en `init.sh`, no
-copiada dentro del contenedor. Regla del proyecto: nada de esto vive solo
-dentro del contenedor.
+### Requisitos
 
-### Estado actual
+- Un sitio Frappe con las apps `lms` y `payments` instaladas (declaradas en
+  `required_apps`, `bench install-app` falla con un mensaje claro si faltan).
+- Cuenta de comercio Webpay Plus en Transbank (para producción). Para
+  probar, Transbank publica credenciales de Integración públicas que esta
+  app ya trae incorporadas — ver más abajo.
 
-- DocType `Webpay Settings`, el controlador (`get_payment_url`,
-  `validate_transaction_currency`, `get_transaction`), `www/webpay-checkout`,
-  `www/webpay-resultado` y `api.py` (`webpay_return` + los 4 flujos de
-  retorno) están implementados siguiendo `readme.md` Partes 3–8 tal cual.
-- `frappe_webpay/setup.py` → `configure_integration_test_mode()` deja el
-  sitio listo para probar en **Integración**: habilita CLP, desactiva
-  `show_usd_equivalent`, carga las credenciales públicas de prueba de
-  Transbank en `Webpay Settings`, y setea
-  `LMS Settings.payment_gateway = Webpay` / `default_currency = CLP`. Se
-  corre sola en `init.sh` en cada bootstrap (no está hookeada a
-  `after_install`: activar una pasarela de pago, aunque sea de prueba, es
-  una decisión que se toma a propósito, no un side-effect silencioso de
-  instalar la app).
-- Verificado con una transacción real contra el sandbox de Integración de
-  Transbank (`frappe_webpay.setup.smoke_test_create`): las credenciales y
-  el SDK funcionan, Transbank acepta la transacción y devuelve token +
-  URL de pago. El `Integration Request` queda registrado correctamente
-  (`status=Queued`, `request_id`=token, `url=https://webpay3gint.transbank.cl/...`).
-- El curso demo "A guide to Frappe Learning" está marcado como
-  `paid_course` a `CLP 50.000` para poder probar el cobro real.
-
-### `return_url` actual: dominio público (túnel/proxy)
-
-Webpay necesita alcanzar la `return_url` **desde el navegador del
-comprador** después de que este termina de pagar en el sitio de Transbank.
-`host_name` está seteado al dominio público que apunta (vía túnel/proxy) a
-este dev:
+### Instalación
 
 ```bash
-bench --site lms.localhost set-config host_name https://achid.labs.codeffeine.io
-# Sin esto, get_url() le agrega ":8000" (webserver_port) al no encontrar
-# puerto explicito en host_name mientras developer_mode este prendido —
-# ver la nota en init.sh junto a esta misma linea.
-bench --site lms.localhost set-config restart_supervisor_on_update 1
-bench --site lms.localhost clear-cache
+bench get-app https://github.com/mgueregath/frappe_webpay.git
+bench --site <tu-sitio> install-app frappe_webpay
 ```
 
-Verificado: `get_url()` y `get_url("/api/method/frappe_webpay.api.webpay_return")`
-ya devuelven `https://achid.labs.codeffeine.io` tal cual, sin puerto.
+(Para desarrollo local con la app montada desde el host en vez de copiada
+dentro del contenedor: `bench get-app --soft-link /ruta/a/frappe_webpay`.)
 
-Antes se usó la IP de LAN de este dev (`http://10.0.0.4:8008`, sin HTTPS)
-para probar desde otros equipos de la misma red sin depender de un túnel;
-funcionaba porque el regreso es una navegación del navegador, no una
-llamada servidor-a-servidor. Si el destino del túnel cambia, o antes de
-producción, hay que volver a apuntar `host_name`:
+### Configurar credenciales (sin tocar código)
+
+Todo se configura desde `/app/webpay-settings` (DocType singleton `Webpay
+Settings`), no hay nada hardcodeado en el código que dependa del sitio:
+
+- **Para probar (ambiente de Integración):** abre `/app/webpay-settings` y
+  presiona el botón **"Usar credenciales públicas de prueba
+  (Integración)"**. Llena `Commerce Code` y `Api Key Secret` con las
+  credenciales que Transbank publica para todos los comercios en ese
+  ambiente (no son secretas, solo sirven contra
+  `webpay3gint.transbank.cl`). Marca `Enabled`.
+- **Para producción:** cambia `Environment` a `Production` e ingresa el
+  `Commerce Code` y `Api Key Secret` reales de tu cuenta Transbank. Nada de
+  código cambia — el SDK enruta solo a `https://webpay3g.transbank.cl`.
+
+Si prefieres dejar un sitio nuevo listo de un solo comando (credenciales de
+Integración + CLP habilitado + `LMS Settings.payment_gateway = Webpay`):
 
 ```bash
-bench --site lms.localhost set-config host_name https://<nuevo-dominio-o-tunel>
-bench --site lms.localhost clear-cache
+bench --site <tu-sitio> execute frappe_webpay.setup.configure_integration_test_mode
 ```
 
-Con la `return_url` alcanzable, seguir la Parte 10 de `readme.md` (tarjetas
-de prueba, los 10 casos a cubrir, diagnóstico vía `Integration Request`).
+### `return_url` alcanzable desde el navegador del comprador
+
+Webpay redirige el navegador del comprador de vuelta a tu sitio después del
+pago, así que `host_name` debe ser una URL pública (HTTPS) alcanzable desde
+afuera — no `localhost` ni una IP privada, salvo que estés probando desde la
+misma red:
+
+```bash
+bench --site <tu-sitio> set-config host_name https://tu-dominio-publico
+bench --site <tu-sitio> clear-cache
+```
+
+Con eso alcanzable, sigue la Parte 10 de `readme.md` (tarjetas de prueba,
+los casos a cubrir, diagnóstico vía `Integration Request`).
+
+### Personalizar la apariencia de la página de resultado
+
+`/webpay-resultado` (la página que ve el comprador tras pagar) trae un
+estilo genérico propio, autocontenido — funciona igual en cualquier
+instancia de Frappe LMS sin depender de ningún theme.
+
+Si tu instancia tiene un theme propio y quieres que esa página use sus
+clases CSS en vez del estilo genérico, declara el hook
+`webpay_result_branding` en el `hooks.py` de tu theme:
+
+```python
+webpay_result_branding = {
+    "container": "tu-clase-css",
+    "surface": "tu-clase-css",
+    "cta_button": "tu-clase-css",
+}
+```
+
+Cualquier clave que omitas conserva el estilo genérico de `frappe_webpay`
+para ese elemento. `frappe_webpay` no depende de ningún theme — es el theme
+el que opta por personalizar esta página. Referencia real de esto en
+`achiduach_theme/hooks.py` de este mismo repo.
 
 ### Camino a producción
 
-Ver `readme.md` Parte 12. Nada de código cambia: se edita `Webpay Settings`
-(`Environment = Production`, código de comercio y Api Key reales) y el SDK
-enruta solo a `https://webpay3g.transbank.cl`.
+Ver `readme.md` Parte 12 para el detalle. En resumen: `Environment =
+Production` y las credenciales reales en `Webpay Settings`, nada más.
 
 ### License
 
-mit
+MIT
+
+---
+
+Desarrollado por [Codeffeine](https://codeffeine.io)
+
+<img src="docs/images/codeffeine-logo.png" alt="Codeffeine" width="180">
+
