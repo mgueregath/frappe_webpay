@@ -1,0 +1,64 @@
+{
+ "actions": [],
+ "creation": "2026-07-15 01:00:00.000000",
+ "default_view": "List",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "enabled",
+  "environment",
+  "commerce_code",
+  "api_key_secret"
+ ],
+ "fields": [
+  {
+   "default": "0",
+   "fieldname": "enabled",
+   "fieldtype": "Check",
+   "label": "Enabled"
+  },
+  {
+   "default": "Integration",
+   "fieldname": "environment",
+   "fieldtype": "Select",
+   "label": "Environment",
+   "options": "Integration\nProduction",
+   "reqd": 1
+  },
+  {
+   "fieldname": "commerce_code",
+   "fieldtype": "Data",
+   "label": "Commerce Code",
+   "reqd": 1
+  },
+  {
+   "fieldname": "api_key_secret",
+   "fieldtype": "Password",
+   "label": "Api Key Secret",
+   "reqd": 1
+  }
+ ],
+ "issingle": 1,
+ "links": [],
+ "modified": "2026-07-15 01:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Frappe Webpay",
+ "name": "Webpay Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "ASC",
+ "states": [],
+ "track_changes": 1
+}

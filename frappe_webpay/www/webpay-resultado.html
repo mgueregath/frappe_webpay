@@ -1,0 +1,39 @@
+{% extends "templates/web.html" %}
+
+{% block page_content %}
+<div class="ach-container" style="padding-top:50px; max-width:560px;">
+<div class="ach-surface">
+
+{% if aprobado %}
+    <h2>Pago aprobado</h2>
+    <p>{{ titulo }}</p>
+    <table>
+        <tr><td>Orden de compra</td><td>{{ orden }}</td></tr>
+        <tr><td>Monto</td><td>{{ frappe.utils.fmt_money(monto, 0, moneda) }}</td></tr>
+        <tr><td>Código de autorización</td><td>{{ autorizacion }}</td></tr>
+        <tr><td>Fecha</td><td>{{ fecha }}</td></tr>
+        <tr><td>Tipo de pago</td><td>{{ tipo_pago }}</td></tr>
+        <tr><td>Cuotas</td><td>{{ cuotas }}</td></tr>
+        <tr><td>Tarjeta</td><td>**** **** **** {{ tarjeta }}</td></tr>
+    </table>
+    <p style="margin-top:24px"><a class="ach-cta-button" href="{{ continuar }}">Ir al curso</a></p>
+
+{% elif estado == "Cancelled" %}
+    <h2>Pago no completado</h2>
+    <p>Orden de compra {{ orden }}. No se realizó ningún cobro.</p>
+    <p><a href="{{ continuar }}">Volver</a></p>
+
+{% else %}
+    <h2>Orden de compra {{ orden }} rechazada</h2>
+    <p>Las posibles causas de este rechazo son:</p>
+    <ul>
+        <li>Error en el ingreso de los datos de su tarjeta (fecha y/o código de seguridad).</li>
+        <li>Su tarjeta no cuenta con saldo suficiente.</li>
+        <li>Tarjeta aún no habilitada en el sistema financiero.</li>
+    </ul>
+    <p><a href="{{ continuar }}">Volver e intentar nuevamente</a></p>
+{% endif %}
+
+</div>
+</div>
+{% endblock %}
